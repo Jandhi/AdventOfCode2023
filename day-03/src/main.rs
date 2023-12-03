@@ -1,6 +1,3 @@
-use core::num;
-use std::collections::HashMap;
-
 fn main() {
     let input = include_str!("input.txt");
 
@@ -40,10 +37,10 @@ enum Tile {
 
 fn read_map(parts : &Vec<Vec<char>>) -> Vec<Vec<Tile>> {
     let mut parts_map = vec![];
-    for y in 0..parts.len() {
+    for _ in 0..parts.len() {
         let mut row = vec![];
 
-        for x in 0..parts[0].len() {
+        for _ in 0..parts[0].len() {
             row.push(Tile::Nothing);
         }
 
