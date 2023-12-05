@@ -55,7 +55,6 @@ struct ScratchCardCount<'a> {
 }
 
 struct ScratchCard {
-    id : u32,
     winning_numbers : Vec<u32>,
     my_numbers : Vec<u32>,
 }
@@ -65,7 +64,6 @@ impl ScratchCard {
         let parts = input.split(":").collect::<Vec<_>>();
         let subparts = parts[1].split(" | ").collect::<Vec<_>>();
         ScratchCard { 
-            id : parts[0][5..].trim().parse().unwrap(),
             winning_numbers: subparts[0].split(" ").map(|string| {
                     string.trim().parse::<u32>()
                 }).filter(|result| result.is_ok())
