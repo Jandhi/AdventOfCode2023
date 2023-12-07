@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::{Display, write}};
+use std::collections::HashMap;
 
 fn main() {
     let input = include_str!("input.txt");
@@ -29,7 +29,6 @@ fn part2(input : &str) {
     let mut ranked : Vec<Hand> = vec![];
 
     for hand in hands {
-        println!("Hand is {} with rank {:?}", hand, hand.hand_type);
         insert_naive(hand.clone(), &mut ranked);
     }
 
@@ -60,24 +59,6 @@ struct Hand {
     hand_type : HandType,
 }
 
-impl Display for Hand {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut str = String::new();
-        for card in self.cards.iter() {
-            str.push(match card {
-                2..=9 => card.to_string().chars().collect::<Vec<_>>()[0],
-                10 => 'T',
-                11 => 'J',
-                12 => 'Q',
-                13 => 'K',
-                14 => 'A',
-                _ => '?',
-            })
-        }
-        write!(f, "{}", str)
-    }
-}
-
 impl Hand {
     pub fn parse(input : &str, jokers : bool) -> Hand {
         let parts = input.split(" ").collect::<Vec<_>>();
@@ -88,7 +69,10 @@ impl Hand {
                     c.to_digit(10).unwrap()
                 }
                 'T' => 10,
-                'J' => 11,
+                'J' => match jokers {
+                    true => 1,
+                    false => 11,
+                },
                 'Q' => 12,
                 'K' => 13,
                 'A' => 14,
@@ -146,8 +130,8 @@ impl HandType {
     }
 
     pub fn assess_p2(cards : &Vec<u32>) -> HandType {
-        let new_cards = cards.iter().filter(|card| **card != 11).map(|card| *card).collect::<Vec<_>>();
-        let joker_count = cards.iter().filter(|card| **card == 11).count();
+        let new_cards = cards.iter().filter(|card| **card != 1).map(|card| *card).collect::<Vec<_>>();
+        let joker_count = cards.iter().filter(|card| **card == 1).count();
 
         if joker_count == 5 {
             return HandType::FiveOfAKind
