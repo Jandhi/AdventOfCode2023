@@ -29,8 +29,11 @@ fn part2(input : &str) {
     let mut ranked : Vec<Hand> = vec![];
 
     for hand in hands {
-        println!("Hand is {} with rank {:?}", hand, hand.hand_type);
         insert_naive(hand.clone(), &mut ranked);
+    }
+    
+    for (index, hand) in ranked.iter().enumerate() {
+        println!("{}: Hand is {} with rank {:?}", index + 1, hand, hand.hand_type);
     }
 
     let sum = ranked.iter()
