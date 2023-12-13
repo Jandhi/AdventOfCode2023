@@ -6,6 +6,7 @@ fn main() {
         .collect();
 
     part1(&lines);
+    part2(&lines);
 }
 
 fn part1(lines : &Vec<Line>) {
@@ -14,6 +15,35 @@ fn part1(lines : &Vec<Line>) {
         .sum();
 
     println!("PART 1: {}", sum);
+}
+
+fn part2(lines : &Vec<Line>) {
+    let updated_lines : Vec<Line> = lines.iter()
+        .map(|line| {
+            let mut runs = line.runs.clone();
+            let mut springs = line.springs.clone();
+
+            for _ in 0..4 {
+                springs.push(Spring::Unknown);
+
+                for run in line.runs.iter() {
+                    runs.push(run.clone());
+                }
+
+                for spring in line.springs.iter() {
+                    springs.push(spring.clone());
+                }
+            } 
+
+            Line { runs, springs }
+        })
+        .collect();
+
+    let sum : usize = updated_lines.iter()
+        .map(Line::variations)
+        .sum();
+
+    println!("PART 2: {}", sum);
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -71,7 +101,6 @@ impl Line {
         if placed.len() == self.runs.len() {
             return match self.is_correct(placed) {
                 true => {
-                    println!("Position correct {:?}", placed);
                     return 1
                 },
                 false => 0,
