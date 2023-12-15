@@ -1,5 +1,5 @@
 fn main() {
-    let input = include_str!("test.txt");
+    let input = include_str!("input.txt");
     let board : Vec<Vec<Tile>> = input.split("\n")
         .map(str::trim)
         .map(|line| {
@@ -41,16 +41,19 @@ fn part2(input_board : &Vec<Vec<Tile>>) {
     let mut board = input_board.clone();
 
     let mut before_cycle = board.clone();
+
+    
     
     loop {
         spin_cycle(&mut board);
-        break; // temp
         
         if board == before_cycle {
             break;
         } else {
             before_cycle = board.clone();
         }
+
+        println!("LOAD: {}", load(&board));
     }
 
     println!("PART 2: {}", load(&board));
@@ -84,17 +87,124 @@ fn load(board : &Vec<Vec<Tile>>) -> usize {
 
 fn spin_cycle(board : &mut Vec<Vec<Tile>>) {
     tilt(board, Direction::North);
-    print_board(&board);
     tilt(board, Direction::West);
-    print_board(&board);
     tilt(board, Direction::South);
-    print_board(&board);
     tilt(board, Direction::East);
-    print_board(&board);
+}
+
+#[derive(PartialEq, Eq, Copy, Clone)]
+struct Pos {
+    x : usize,
+    y : usize
+}
+
+impl Pos {
+    fn next(&self, direction : &Direction, board : &Vec<Vec<Tile>>) -> Option<Pos> {
+        match direction {
+            Direction::North => match self.y > 0 {
+                true => Some(Pos { x: self.x, y: self.y - 1 }),
+                false => None,
+            },
+            Direction::South => match self.y < board.len() - 1 {
+                true => Some(Pos { x: self.x, y: self.y + 1}),
+                false => None,
+            }
+            Direction::East => match self.x < board[0].len() - 1 {
+                true => Some(Pos { x: self.x + 1, y: self.y }),
+                false => None,
+            },
+            Direction::West => match self.x > 0 {
+                true => Some(Pos { x: self.x - 1, y: self.y }),
+                false => None,
+            },
+        }
+    }
+
+    fn get(&self, board : &Vec<Vec<Tile>>) -> Tile {
+        board[self.y][self.x]
+    }
+
+    fn set(&self, board : &mut Vec<Vec<Tile>>, value : Tile) {
+        board[self.y][self.x] = value;
+    }
+
+    fn start_positions(direction : &Direction, board : &Vec<Vec<Tile>>) -> Vec<Pos> {
+        let mut positions = vec![];
+
+        match direction {
+            Direction::North => {
+                for x in 0..board[0].len() {
+                    positions.push(Pos { x, y: board.len() - 1 });
+                }
+            },
+            Direction::South => {
+                for x in 0..board[0].len() {
+                    positions.push(Pos { x, y: 0 })
+                }
+            },
+            Direction::East => {
+                for y in 0..board.len() {
+                    positions.push(Pos { x: 0, y })
+                }
+            },
+            Direction::West => {
+                for y in 0..board.len() {
+                    positions.push(Pos { x: board[0].len() - 1, y });
+                }
+            },
+        }
+
+        positions
+    }
 }
 
 fn tilt(board : &mut Vec<Vec<Tile>>, direction : Direction) {
-    // TODO more elegant tilt
+    for start_pos in Pos::start_positions(&direction, board) {
+        let mut run : Vec<Pos> = vec![];
+        let mut round_count = 0;
+        let mut curr_pos = start_pos;
+
+        loop {
+            if curr_pos.get(board) == Tile::Square {
+                if run.len() > 0 {
+                    for (index, pos) in run.iter().enumerate() {
+                        if run.len() - index <= round_count {
+                            pos.set(board, Tile::Round);
+                        } else {
+                            pos.set(board, Tile::Empty);
+                        }
+                    }
+
+                    round_count = 0;
+                    run.clear();
+                }
+            } else {
+                run.push(curr_pos);
+
+                if curr_pos.get(board) == Tile::Round {
+                    round_count += 1;
+                }
+            }
+
+            match curr_pos.next(&direction, board) {
+                Some(pos) => curr_pos = pos,
+                None => break,
+            };
+        }
+
+        if run.len() > 0 {
+            for (index, pos) in run.iter().enumerate() {
+                if run.len() - index <= round_count {
+                    pos.set(board, Tile::Round);
+                } else {
+                    pos.set(board, Tile::Empty);
+                }
+            }
+
+            round_count = 0;
+            run.clear();
+        }
+    }
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
