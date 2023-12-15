@@ -39,24 +39,32 @@ fn part1(input_board : &Vec<Vec<Tile>>) {
 
 fn part2(input_board : &Vec<Vec<Tile>>) {
     let mut board = input_board.clone();
-
-    let mut before_cycle = board.clone();
-
+    let mut loads = vec![];
     
     
-    loop {
+    // Definitely looped by now
+    for _ in 0..1_000 {
         spin_cycle(&mut board);
-        
-        if board == before_cycle {
-            break;
-        } else {
-            before_cycle = board.clone();
-        }
-
-        println!("LOAD: {}", load(&board));
+        let load = load(&board);
+        loads.push(load);
     }
 
-    println!("PART 2: {}", load(&board));
+    let spins = loads.len();
+
+    let second_last_appearance = loads.iter()
+        .enumerate()
+        .rev()
+        .find(|(index, my_load)| {
+            let diff = loads.len() - 1 - index;
+
+            diff > 0 && *my_load == loads.last().unwrap() && **my_load == loads[index - diff]
+        })
+        .unwrap()
+        .0;
+
+    let cycle_len = spins - second_last_appearance - 1;
+    let index = ((1_000_000_000 - second_last_appearance) % cycle_len) + second_last_appearance - 1;
+    println!("PART 2: {}", loads[index]);
 }
 
 #[derive(PartialEq, Eq)]
